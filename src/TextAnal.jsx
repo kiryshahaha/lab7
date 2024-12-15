@@ -44,7 +44,7 @@ const TextAnalyzer = ({ setTableData, setFileData, fileData }) => {
         }
 
         const lowerCaseText = text.toLowerCase();
-        const symbols = 'абвгдежзийклмнопрстуфхцчшщъыьэюя0123456789.,:;- ';
+        const symbols = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюя0123456789.,:;-( ';
         const validText = Array.from(lowerCaseText).filter(char => symbols.includes(char)).join('');
         const totalCharacters = validText.length;
         let totalProbability = 0;
