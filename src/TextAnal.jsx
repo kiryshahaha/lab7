@@ -14,23 +14,24 @@ const TextAnalyzer = ({ setTableData, setFileData, fileData }) => {
             setText(fileData.content);
         }
     }, [fileData]);
-
+//обработка файла
     const handleFileChange = (event) => {
-        setError(null);
-        const file = event.target.files[0];
-        setFile(file);
-        setFileData({ file, content: '' });
+        setError(null); //сбрасывание ткекущего состояния ошибки
+        const file = event.target.files[0]; //извлекается первый файл из списка загруженных файлов
+        setFile(file); //сохранение выбранного файла
+        setFileData({ file, content: '' }); //сохраняется сам файл и пустая строка для его содержимого
+        //обработка возможных ошибок
         try {
-            const reader = new FileReader();
+            const reader = new FileReader(); //асинхронное чтение файла
             reader.onload = (e) => {
-                console.log('Text from file:', e.target.result);
-                setText(e.target.result);
+                console.log('Text from file:', e.target.result); //выводится содержимое файла в консоль
+                setText(e.target.result); //сохранение текста
                 setFileData({ file, content: e.target.result });
             };
             reader.onerror = () => {
                 setError('Ошибка при чтении файла');
             };
-            reader.readAsText(file);
+            reader.readAsText(file); //чтение текста
         } catch (err) {
             console.error('Error reading file:', err);
             setError('Ошибка при чтении файла');
@@ -38,49 +39,54 @@ const TextAnalyzer = ({ setTableData, setFileData, fileData }) => {
     };
 
     const analyzeText = () => {
+        //проверка наличия текста
         if (!text) {
           setError('Текст не загружен');
           return;
         }
 
-        const lowerCaseText = text.toLowerCase();
-        const symbols = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюя0123456789.,:;-( ';
-        const validText = Array.from(lowerCaseText).filter(char => symbols.includes(char)).join('');
-        const totalCharacters = validText.length;
+        const lowerCaseText = text.toLowerCase(); //преобразование текста в нижний регистр
+        const symbols = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюя0123456789.,:;-( '; //символы для дальнейшего анализа
+        const validText = Array.from(lowerCaseText).filter(char => symbols.includes(char)).join(''); //оставляет в тексте только вышеупомянутые символы
+        const totalCharacters = validText.length; //считает общее кол-во символов
         let totalProbability = 0;
 
+        //создается массив символов и с помощью map проходит по ним
         const symbolCounts = Array.from(symbols).map((symbol) => {
-          const count = (validText.split(symbol).length - 1);
-          const probability = totalCharacters > 0 ? count / totalCharacters : 0;
+          const count = (validText.split(symbol).length - 1); //кол-во вхождений символа в текст
+          const probability = totalCharacters > 0 ? count / totalCharacters : 0; //вероятность = если всего символов > 0, то кол-во вхождений делится на общее кол-во символов
           totalProbability += probability;
-          const information = probability > 0 ? -Math.log2(probability) : 0;
+          const information = probability > 0 ? -Math.log2(probability) : 0; //информация = если вероятность > 0, то вычисляется по формуле -log2(p), иначе 0
           return { symbol, count, probability, information };
         });
 
+        //нормализование данных
         const normalizedSymbolCounts = symbolCounts.map((symbolCount) => {
           const normalizedProbability = totalCharacters > 0 ? symbolCount.count / totalCharacters : 0;
           return { ...symbolCount, normalizedProbability };
         });
 
+        //повторное суммирование символов
         const totalSymbols = normalizedSymbolCounts.reduce((sum, symbol) => sum + symbol.count, 0);
-        const entropy = normalizedSymbolCounts.reduce((sum, symbol) => sum + symbol.normalizedProbability * symbol.information, 0);
+        //вычисление энтропии
+        const entropy = normalizedSymbolCounts.reduce((sum, symbol) => sum + symbol.normalizedProbability * symbol.information, 0); //сумма произведений нормализованной вероятности каждого символа на его информацию
 
         const comparisonData = {
           ASCII: {
-            uncertainty: 8,
+            uncertainty: 8, 
             codeLength: 8,
-            absoluteRedundancy: 8 - entropy,
-            relativeRedundancy: (8 - entropy) / 8,
+            absoluteRedundancy: 8 - entropy, //абсолютная избыточность = разница между длиной кода (8 бит) и энтропией текста
+            relativeRedundancy: (8 - entropy) / 8, //относительная избыточность = отношение абсолютной избыточности к длине кода
           },
           Hartley: {
-            uncertainty: Math.log2(symbols.length),
-            codeLength: Math.ceil(Math.log2(symbols.length)),
-            absoluteRedundancy: Math.ceil(Math.log2(symbols.length)) - entropy,
-            relativeRedundancy: (Math.ceil(Math.log2(symbols.length)) - entropy) / Math.ceil(Math.log2(symbols.length)),
+            uncertainty: Math.log2(symbols.length), //неопределенность Хартли log2(кол-во символов)
+            codeLength: Math.ceil(Math.log2(symbols.length)), //округляет значение uncertainty до ближайшего большего целого, указывая сколько бит потребуется для кодирования символа
+            absoluteRedundancy: Math.ceil(Math.log2(symbols.length)) - entropy, //сколько лишней информации содержится в тексте (абсолютная избыточность)
+            relativeRedundancy: (Math.ceil(Math.log2(symbols.length)) - entropy) / Math.ceil(Math.log2(symbols.length)), //показывает насколько эффективно используется пространство для хранения информации
           },
         };
 
-        const data = { symbolCounts: normalizedSymbolCounts, totalSymbols, entropy, comparisonData, totalProbability };
+        const data = { symbolCounts: normalizedSymbolCounts, totalSymbols, entropy, comparisonData, totalProbability }; //массив с данными о каждом символе
         setLocalTableData(data);
         setTableData(data);
     };
