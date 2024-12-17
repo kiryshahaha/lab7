@@ -14,6 +14,7 @@ class Node {
 
 // Функция построения дерева Фано, принимает массив symbolCounts
 const buildShannonFanoTree = (symbolCounts) => {
+    //проверка базового случая (для остановки рекурсивной функции если делить на группы уже нечего)
     if (symbolCounts.length === 1) {
         return new Node(symbolCounts[0].symbol, symbolCounts[0].probability, symbolCounts[0].count);
     }
@@ -23,54 +24,66 @@ const buildShannonFanoTree = (symbolCounts) => {
     
     // Общая сумма вероятностей
     let total = symbolCounts.reduce((sum, sc) => sum + sc.probability, 0);
+    //накопление вероятностей в левой группе
     let cumulativeProbability = 0;
+    //индекс символа разделения
     let splitIndex = 0;
+    //значение разницы будет гарантированно меньше
     let minDifference = Infinity;
 
     // Проверка всех возможных разделений
     for (let i = 0; i < symbolCounts.length - 1; i++) {
+        //На каждой итерации добавляется вероятность текущего символа к cumulativeProbability
         cumulativeProbability += symbolCounts[i].probability;
+        // текущая сумма вероятностей для левой группы
         const leftSum = cumulativeProbability;
+        // сумма вероятностей для правой группы
         const rightSum = total - leftSum;
+        //значение показывает насколько сбалансированы группы
         const difference = Math.abs(leftSum - rightSum);
 
+        //если текущая разница меньше минимальной разницы, то обновляются значения minDifference и splitIndex
         if (difference < minDifference) {
             minDifference = difference;
             splitIndex = i;
         }
     }
-
-    const leftGroup = symbolCounts.slice(0, splitIndex + 1);
-    const rightGroup = symbolCounts.slice(splitIndex + 1);
-
+//массив symbolCounts делится на на две группы 
+    const leftGroup = symbolCounts.slice(0, splitIndex + 1); //leftGroup - символы от начала до splitIndex
+    const rightGroup = symbolCounts.slice(splitIndex + 1); //rightGroup - символы с индексами от splitIndex+1 до конца массива
+//для каждой из двух групп вызывается функция buildShannonFanoTree, которая строит поддеревья для левой и правой группы
     const leftNode = buildShannonFanoTree(leftGroup);
     const rightNode = buildShannonFanoTree(rightGroup);
+    //создается корневой узел для текущей итерации
     const root = new Node(null, leftGroup.reduce((sum, sc) => sum + sc.probability, 0), leftGroup.length + rightGroup.length);
     root.left = leftNode;
     root.right = rightNode;
 
     return root;
 };
-
+//функция построения кодов Фано
 const buildShannonFanoCodes = (root) => {
-    const codes = {};
+    const codes = {}; //массив для хранения кодов
+    //вспомогательная функция которая проходит по дереву и создает коды для каждого символа
     const buildCodesRecursive = (node, prefix) => {
+       //если узел не является листом
         if (node.symbol !== null) {
             codes[node.symbol] = { code: prefix, probability: node.probability, count: node.count };
             return;
         }
-        buildCodesRecursive(node.left, prefix + '0');
-        buildCodesRecursive(node.right, prefix + '1');
+        buildCodesRecursive(node.left, prefix + '0'); //если левое поддерево то +0
+        buildCodesRecursive(node.right, prefix + '1'); //если правое то +1
     };
 
     buildCodesRecursive(root, '');
+    //массив объектов где каждый объект описывает символ и его соответствующий код
     return Object.entries(codes).map(([symbol, { code, probability, count }]) => ({ symbol, code, probability, count }));
 };
-
+//вычисляет энтропию для набора символов -p*log2(p)
 const calculateEntropy = (symbolCounts) => {
     return symbolCounts.reduce((sum, sc) => sum - sc.probability * Math.log2(sc.probability), 0);
 };
-
+//вычисляет среднюю длину кода вероятность*длину кода
 const calculateAverageCodeLength = (shannonFanoCodes) => {
     return shannonFanoCodes.reduce((sum, { probability, code }) => sum + probability * code.length, 0);
 };
