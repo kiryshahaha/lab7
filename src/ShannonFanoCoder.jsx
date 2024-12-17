@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import './Haffman.css';
 
+// Класс для создания объектов, которые будут представлять узлы дерева
 class Node {
     constructor(symbol, probability, count) {
         this.symbol = symbol;
@@ -11,22 +12,31 @@ class Node {
     }
 }
 
+// Функция построения дерева Фано, принимает массив symbolCounts
 const buildShannonFanoTree = (symbolCounts) => {
     if (symbolCounts.length === 1) {
         return new Node(symbolCounts[0].symbol, symbolCounts[0].probability, symbolCounts[0].count);
     }
 
+    // Сортировка по убыванию вероятностей
     symbolCounts.sort((a, b) => b.probability - a.probability);
-
+    
+    // Общая сумма вероятностей
     let total = symbolCounts.reduce((sum, sc) => sum + sc.probability, 0);
     let cumulativeProbability = 0;
     let splitIndex = 0;
+    let minDifference = Infinity;
 
-    for (let i = 0; i < symbolCounts.length; i++) {
+    // Проверка всех возможных разделений
+    for (let i = 0; i < symbolCounts.length - 1; i++) {
         cumulativeProbability += symbolCounts[i].probability;
-        if (cumulativeProbability >= total / 2) {
+        const leftSum = cumulativeProbability;
+        const rightSum = total - leftSum;
+        const difference = Math.abs(leftSum - rightSum);
+
+        if (difference < minDifference) {
+            minDifference = difference;
             splitIndex = i;
-            break;
         }
     }
 
