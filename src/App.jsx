@@ -1,4 +1,3 @@
-// src/App.js
 import React, { useState } from 'react';
 import Tabs from './Tabs';
 import TabPanel from './TabPanel';

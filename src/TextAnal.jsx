@@ -1,4 +1,3 @@
-// src/TextAnalyzer.jsx
 import React, { useState, useEffect } from 'react';
 import './Chast1.css';
 

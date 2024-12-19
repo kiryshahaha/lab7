@@ -96,6 +96,7 @@ const ShannonFanoCoder = ({ tableData }) => {
     const [encodedMessage, setEncodedMessage] = useState('');
     const [binaryInput, setBinaryInput] = useState('');
     const [decodedMessage, setDecodedMessage] = useState('');
+    const [error, setError] = useState(null);
 
     useEffect(() => {
         if (tableData) {
@@ -140,7 +141,7 @@ const ShannonFanoCoder = ({ tableData }) => {
         if (shannonFanoCodes) {
             const encodedMessage = encodeMessage(inputText, shannonFanoCodes);
             setEncodedMessage(encodedMessage);
-        }
+        } 
     };
 
     const handleDecode = () => {

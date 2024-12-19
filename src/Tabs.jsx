@@ -1,4 +1,3 @@
-// src/Tabs.jsx
 import React from 'react';
 import './Tabs.css'; // Добавим стили для вкладок
 

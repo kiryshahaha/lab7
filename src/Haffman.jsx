@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import './Haffman.css'; 
+import './Haffman.css';
 
 //class - шаблон для создания объектов с определенными свойствами и методами
 //Класс Node - узел дерева Хаффмана
@@ -8,7 +8,7 @@ class Node {
     constructor(symbol, probability, count) { //каждый узел содержит символ, вероятность, кол-во вхождений
         this.symbol = symbol; //св-во symbol хранит символ, который будет ассоциирован с этим узлом
         this.probability = probability; //св-во probability хранит вероятность вхождения (символы с большей вероятностью располагаются ближе к корню)
-        this.count = count; //св-во count хранит кол-во вхождений 
+        this.count = count; //св-во count хранит кол-во вхождений
         this.left = null; //св-во left указывает на левый дочерний узел
         this.right = null; //правый дочерний узел
     }
@@ -29,7 +29,7 @@ class MinHeap {
     extractMin() {
         //если в куче только один элемент -> с помощью pop() удаляем его и возвращаем
         if (this.heap.length === 1) return this.heap.pop(); //нужно от ошибок если уже нечего перемещать
-        const min = this.heap[0]; //сохраняет минимальный элемент (корень кучи) в переменной min 
+        const min = this.heap[0]; //сохраняет минимальный элемент (корень кучи) в переменной min
         this.heap[0] = this.heap.pop(); //мы заменяем удаляемый корень последним элементом, чтобы уменьшить размер кучи на один
         this.sinkDown(0); //после замены корня на посл. элемент нужно восстановить свойства кучи (перемещая новый корень вниз по дереву, пока он не займёт правильное место)
         return min; //доступ к минимальному удаленному элементу
@@ -82,12 +82,11 @@ class MinHeap {
             //если swap не был обновлен -> выходим из цикла
             if (swap === null) break;
             this.heap[parentIndex] = this.heap[swap]; //меняет местами текущий элемент с элементом по индексу swap
-            this.heap[swap] = element; 
+            this.heap[swap] = element;
             parentIndex = swap;
         }
     }
 }
-
 
 //функция buildHuffmanTree создает дерево Хаффмана на основе частот символов
 //symbolCounts - массив с символом, его вероятностью и числом вхождений
@@ -97,7 +96,7 @@ const buildHuffmanTree = (symbolCounts) => {
 //пока в куче не останется один узел(корень)
     while (heap.heap.length > 1) {
         //извлекаются два узла с минимальной вероятностью
-        const left = heap.extractMin(); 
+        const left = heap.extractMin();
         const right = heap.extractMin();
         //создается новый узел merged который объединяет эти два узла (его вероятность = сумме вероятностьй этих узлов, его число вхождений = сумме вхождений этих двух узлов)
         const merged = new Node(null, left.probability + right.probability, left.count + right.count);
@@ -107,7 +106,7 @@ const buildHuffmanTree = (symbolCounts) => {
         heap.insert(merged); //новый узел добавляется обратно в кучу
     }
 
-    return heap.extractMin(); //результат возвращается в корень 
+    return heap.extractMin(); //результат возвращается в корень
 };
 
 //функция buildHuffmanCodes генерирует коды Хаффмана для каждого символа на основе построенного дерева
@@ -138,6 +137,8 @@ const calculateEntropy = (symbolCounts) => {
 const calculateAverageCodeLength = (huffmanCodes) => {
     return huffmanCodes.reduce((sum, { probability, code }) => sum + probability * code.length, 0);
 };
+
+
 
 const HuffmanCoder = ({ tableData }) => {
     const [huffmanCodes, setHuffmanCodes] = useState(null); //таблица кодов Хаффмана
