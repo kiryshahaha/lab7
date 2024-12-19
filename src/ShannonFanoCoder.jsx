@@ -71,8 +71,8 @@ const buildShannonFanoCodes = (root) => {
             codes[node.symbol] = { code: prefix, probability: node.probability, count: node.count };
             return;
         }
-        buildCodesRecursive(node.left, prefix + '0'); //если левое поддерево то +0
-        buildCodesRecursive(node.right, prefix + '1'); //если правое то +1
+        buildCodesRecursive(node.left, prefix + '1'); //если левое поддерево то +0
+        buildCodesRecursive(node.right, prefix + '0'); //если правое то +1
     };
 
     buildCodesRecursive(root, '');
