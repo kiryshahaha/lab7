@@ -1,5 +1,5 @@
 import React from 'react';
-import './Tabs.css'; // Добавим стили для вкладок
+import './Tabs.css';
 
 const Tabs = ({ tabs, activeTab, onTabChange }) => {
   return (
